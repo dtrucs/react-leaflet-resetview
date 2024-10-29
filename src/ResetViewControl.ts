@@ -1,7 +1,7 @@
 import { createControlComponent } from "@react-leaflet/core";
 import { Control, DomUtil, DomEvent, Util } from "leaflet";
 
-import type { Map, ControlOptions, LatLng } from "leaflet";
+import type { Map, ControlOptions, LatLng, LatLngExpression } from "leaflet";
 
 export type ResetViewControlOptions = {
   /**
@@ -14,15 +14,22 @@ export type ResetViewControlOptions = {
    * It renders a box by default.
    */
   icon?: string;
+
+  /**
+   * "zoomToReset" and "centerToReset" properties are useful when the map is mounted in a particular position
+   * and you need this button to reset the view to another position.
+  */
+  zoomToReset?: number;
+  centerToReset?: LatLngExpression;
 } & ControlOptions;
 
 const _getControl = Control.extend({
-  options: { position: "topleft", title: "Reset map view", icon: "\u2610" },
+  options: { position: "topleft", title: "Reset map view", icon: "\u2610", zoomToReset: null, centerToReset: null },
 
   onAdd: function (map: Map) {
     Util.setOptions(this, {
-      zoom: map.getZoom(),
-      center: map.getCenter(),
+      zoom: this.options.zoomToReset ?? map.getZoom(),
+      center: this.options.centerToReset ?? map.getCenter(),
     });
 
     const { title, icon } = this.options;

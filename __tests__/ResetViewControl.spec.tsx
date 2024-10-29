@@ -16,24 +16,24 @@ describe("ResetViewControl", () => {
   const defaultMapCenter = [-96.8716348, 32.8205866] as LatLngExpression;
   const defaultMapZoom = 5
 
-  const ControlWrapper = ({ title, icon }: ResetViewControlOptions) => {
+  const ControlWrapper = ({ title, icon, centerToReset, zoomToReset }: ResetViewControlOptions) => {
     useMapEvents({
       viewreset: mockHandleViewReset,
     });
 
     return (
-      <>
-        <ResetViewControl
-          title={title ?? "Reset view"}
-          icon={icon ?? "\u2612"}
-        />
-      </>
+      <ResetViewControl
+        title={title ?? "Reset view"}
+        icon={icon ?? "\u2612"}
+        centerToReset={centerToReset}
+        zoomToReset={zoomToReset}
+      />
     );
   };
-  const Map = ({ title, icon }: ResetViewControlOptions) => {
+  const Map = ({ title, icon, centerToReset, zoomToReset }: ResetViewControlOptions) => {
     return (
       <MapContainer zoom={defaultMapZoom} center={defaultMapCenter} ref={map => mapInstance = map}>
-        <ControlWrapper title={title} icon={icon} />
+        <ControlWrapper title={title} icon={icon} centerToReset={centerToReset} zoomToReset={zoomToReset} />
       </MapContainer>
     );
   };
@@ -57,6 +57,24 @@ describe("ResetViewControl", () => {
     expect(mapInstance?.getZoom()).toEqual(defaultMapZoom)
 
     expect(mockHandleViewReset).toHaveBeenCalledTimes(2);
+  });
+
+  test("can reset the map view to a zoom and center different from those mounted by the map", () => {
+    const centerToReset = [44.8, 6.3] as LatLngExpression;
+    const zoomToReset = 17;
+    render(<Map centerToReset={centerToReset} zoomToReset={zoomToReset} />);
+
+    expect(mapInstance?.getCenter().lat).toBeCloseTo(defaultMapCenter[0], 1);
+    expect(mapInstance?.getCenter().lng).toBeCloseTo(defaultMapCenter[1], 1);
+    expect(mapInstance?.getZoom()).toEqual(defaultMapZoom)
+
+    userEvent.click(screen.getByTitle("Reset view"));
+
+    expect(mapInstance?.getCenter().lat).toBeCloseTo(centerToReset[0], 1);
+    expect(mapInstance?.getCenter().lng).toBeCloseTo(centerToReset[1], 1);
+    expect(mapInstance?.getZoom()).toEqual(zoomToReset)
+
+    expect(mockHandleViewReset).toHaveBeenCalledTimes(3);
   });
 
   test("can see icon", () => {
