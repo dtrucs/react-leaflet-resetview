@@ -8,12 +8,13 @@ import { MapContainer, useMapEvents } from "react-leaflet";
 import ResetViewControl from "../src/ResetViewControl";
 
 import type { ResetViewControlOptions } from "../src/ResetViewControl";
-import type { LatLngExpression, Map } from "leaflet";
+import { LatLng } from "leaflet";
+import type { Map } from "leaflet";
 
 describe("ResetViewControl", () => {
   const mockHandleViewReset = jest.fn();
   let mapInstance = null as Map | null
-  const defaultMapCenter = [-96.8716348, 32.8205866] as LatLngExpression;
+  const defaultMapCenter = new LatLng(-96.8716348, 32.8205866);
   const defaultMapZoom = 5
 
   const ControlWrapper = ({ title, icon, centerToReset, zoomToReset }: ResetViewControlOptions) => {
@@ -40,11 +41,11 @@ describe("ResetViewControl", () => {
 
   test("can reset map view", () => {
     render(<Map />);
-    expect(mapInstance?.getCenter().lat).toBeCloseTo(defaultMapCenter[0], 1);
-    expect(mapInstance?.getCenter().lng).toBeCloseTo(defaultMapCenter[1], 1);
+    expect(mapInstance?.getCenter().lat).toBeCloseTo(defaultMapCenter.lat, 1);
+    expect(mapInstance?.getCenter().lng).toBeCloseTo(defaultMapCenter.lng, 1);
     expect(mapInstance?.getZoom()).toEqual(defaultMapZoom)
 
-    mapInstance?.setView([2, 46], 6)
+    mapInstance?.setView(new LatLng(2, 46), 6)
 
     expect(mapInstance?.getCenter().lat).toBeCloseTo(2, 1);
     expect(mapInstance?.getCenter().lng).toBeCloseTo(46, 1);
@@ -52,26 +53,26 @@ describe("ResetViewControl", () => {
 
     userEvent.click(screen.getByTitle("Reset view"));
 
-    expect(mapInstance?.getCenter().lat).toBeCloseTo(defaultMapCenter[0], 1);
-    expect(mapInstance?.getCenter().lng).toBeCloseTo(defaultMapCenter[1], 1);
+    expect(mapInstance?.getCenter().lat).toBeCloseTo(defaultMapCenter.lat, 1);
+    expect(mapInstance?.getCenter().lng).toBeCloseTo(defaultMapCenter.lng, 1);
     expect(mapInstance?.getZoom()).toEqual(defaultMapZoom)
 
     expect(mockHandleViewReset).toHaveBeenCalledTimes(2);
   });
 
   test("can reset the map view to a zoom and center different from those mounted by the map", () => {
-    const centerToReset = [44.8, 6.3] as LatLngExpression;
+    const centerToReset = new LatLng(44.8, 6.3);
     const zoomToReset = 17;
     render(<Map centerToReset={centerToReset} zoomToReset={zoomToReset} />);
 
-    expect(mapInstance?.getCenter().lat).toBeCloseTo(defaultMapCenter[0], 1);
-    expect(mapInstance?.getCenter().lng).toBeCloseTo(defaultMapCenter[1], 1);
+    expect(mapInstance?.getCenter().lat).toBeCloseTo(defaultMapCenter.lat, 1);
+    expect(mapInstance?.getCenter().lng).toBeCloseTo(defaultMapCenter.lng, 1);
     expect(mapInstance?.getZoom()).toEqual(defaultMapZoom)
 
     userEvent.click(screen.getByTitle("Reset view"));
 
-    expect(mapInstance?.getCenter().lat).toBeCloseTo(centerToReset[0], 1);
-    expect(mapInstance?.getCenter().lng).toBeCloseTo(centerToReset[1], 1);
+    expect(mapInstance?.getCenter().lat).toBeCloseTo(centerToReset.lat, 1);
+    expect(mapInstance?.getCenter().lng).toBeCloseTo(centerToReset.lng, 1);
     expect(mapInstance?.getZoom()).toEqual(zoomToReset)
 
     expect(mockHandleViewReset).toHaveBeenCalledTimes(3);
